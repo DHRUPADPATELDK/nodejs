@@ -1,7 +1,7 @@
 "scripts": { "serve": "nodemon server.js" },
 
 npm install -g nodemon
-# or if using yarn
+ or if using yarn
 yarn global add nodemon
 
 
