@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const nodemailer=require('nodemailer')
 
 const authenticate =require ("../middleware/authenticate")
 
@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken')
 
 require('../db/conn')
 const User =require("../model/userSchema");
+const { response } = require('express');
 
 router.get('/', (req, res) => {
     res.send(`Hello world from the server router js`);
@@ -19,7 +20,7 @@ router.get('/', (req, res) => {
 router.post('/register', async(req, res) => {
 
     const {name,email,phone,work,password,cpassword} =req.body;
-
+  
     if( !name || !email || !phone || !work || !password || !cpassword){
        return res.status(422).json({ error :"plz filled the filed properly "});
     }
@@ -43,9 +44,47 @@ router.post('/register', async(req, res) => {
 
         const userRegister =  await user.save();
 
+
+        ////////////
+          // gmail send the data 
+          let smtpTransport=nodemailer.createTransport({
+            service:'gmail',
+            port:465,
+            auth:{
+                user:'enter your email id',
+                pass:'enter your password '
+            }
+        })   
+
+        let mailOPtions ={
+           from:'dhrupad1912@gmail.com',
+           to: "dhrupad1912@gmail.com", 
+           subject: "Hello ✔",
+           html: `
+           <h1>information</h1>
+           <ul>
+           <li> ${name}  </li>
+           <li> ${email}  </li>
+           <li> ${phone}  </li>
+           <li> ${work}  </li>
+           </ul>
+           `
+        }
+      
+        smtpTransport.sendMail(mailOPtions,(error,response)=>{
+            if (error) {
+                res.send(error)
+            } else {
+                res.send('success')
+            }
+        })
+    smtpTransport.close(); //
+    
+    ///////////
+
         if(userRegister){
           res.status(201).json({ Message :"user register suc  "});
-        }
+         }
 
        }
     } catch (err) {
